@@ -29,6 +29,14 @@ app.get('/api/persons', (request, response) => {
     response.json(persons)
 })
 
+app.get('/api/persons/:id', (request, response) => {
+    const person = persons.find(p => p.id === Number(request.params.id))
+    if (!person) {
+        response.status(404).end()
+    }
+    response.json(persons)
+})
+
 app.get('/info', (request, response) => {
     const contactsQty = persons.length
     let html = `<p>Phonebook has info for ${contactsQty} ${contactsQty === 1 ? 'person' : 'people'}</p>`
