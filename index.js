@@ -25,12 +25,15 @@ const persons = [
     }
 ]
 
-app.get('/', (request, response) => {
-    response.send('<h1>Phonebook</h1>')
-})
-
 app.get('/api/persons', (request, response) => {
     response.json(persons)
+})
+
+app.get('/info', (request, response) => {
+    const contactsQty = persons.length
+    let html = `<p>Phonebook has info for ${contactsQty} ${contactsQty === 1 ? 'person' : 'people'}</p>`
+    html += `<p>${new Date(Date.now()).toString()}</p>`
+    response.send(html)
 })
 
 const PORT = 3001
