@@ -2,6 +2,8 @@ const express = require('express')
 
 const app = express()
 
+app.use(express.json())
+
 let persons = [
     {
         "id": 1,
@@ -38,6 +40,23 @@ app.get('/api/persons/:id', (request, response) => {
     response.json(persons)
 })
 
+app.post('/api/persons', (request, response) => {
+    const body = request.body
+    console.log(body);
+    if (!body.name || !body.number) {
+        return response.status(400).json({
+            error: 'content missing'
+        })
+    }
+    const newPerson = {
+        name: body.name,
+        number: body.number,
+        id: getNewId()
+    }
+    persons = persons.concat(newPerson)
+    response.json(newPerson)
+})
+
 app.delete('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
     const updatedPersons = persons.filter(p => p.id !== id)
@@ -56,6 +75,15 @@ app.get('/info', (request, response) => {
     html += `<p>${new Date(Date.now()).toString()}</p>`
     response.send(html)
 })
+
+const getNewId = () => {
+    let newId = 0
+    do {
+        newId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
+    } while (persons.some(p => p.id === newId))
+
+    return newId
+}
 
 const PORT = 3001
 // const HOST_NAME = 'localhost'
