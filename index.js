@@ -5,7 +5,20 @@ const app = express()
 
 app.use(express.json())
 
-app.use(morgan('tiny'))
+morgan.token('response-data', (req, res) => JSON.stringify(req.body))
+
+// app.use(morgan((tokens, req, res) => (
+//     [
+//         tokens.method(req, res),
+//         tokens.url(req, res),
+//         tokens.status(req, res),
+//         tokens.res(req, res, 'content-length'), '-',
+//         tokens['response-time'](req, res), 'ms',
+//         tokens['response-data'](req, res)
+//     ].join(' ')
+// )))
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :response-data'))
 
 let persons = [
     {
@@ -45,7 +58,6 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.post('/api/persons', (request, response) => {
     const body = request.body
-    console.log(body);
     if (!body.name || !body.number) {
         return response.status(400).json({
             error: 'content missing'
