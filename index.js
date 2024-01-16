@@ -17,17 +17,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions))
 
-// app.use(morgan((tokens, req, res) => (
-//     [
-//         tokens.method(req, res),
-//         tokens.url(req, res),
-//         tokens.status(req, res),
-//         tokens.res(req, res, 'content-length'), '-',
-//         tokens['response-time'](req, res), 'ms',
-//         tokens['response-data'](req, res)
-//     ].join(' ')
-// )))
-
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :response-data'))
 
 let persons = [
@@ -115,8 +104,7 @@ const getNewId = () => {
     return newId
 }
 
-const PORT = 3001
-// const HOST_NAME = 'localhost'
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on port: ${PORT}`);
 })
