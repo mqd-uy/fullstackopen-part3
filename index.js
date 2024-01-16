@@ -1,11 +1,21 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 
 const app = express()
 
 app.use(express.json())
 
 morgan.token('response-data', (req, res) => JSON.stringify(req.body))
+
+const corsOptions = {
+    origin: [
+        'http://localhost:5173',
+        'https://localhost:5173'
+    ]
+}
+
+app.use(cors(corsOptions))
 
 // app.use(morgan((tokens, req, res) => (
 //     [
