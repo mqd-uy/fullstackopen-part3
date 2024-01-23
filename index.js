@@ -77,18 +77,23 @@ app.post('/api/persons', (request, response) => {
             error: 'content missing'
         })
     }
+    /*
     if (persons.some(p => p.name === body.name)) {
         return response.status(409).json({
             error: 'name must be unique'
         })
     }
-    const newPerson = {
+    */
+    const newPerson = new Person({
         name: body.name,
-        number: body.number,
-        id: getNewId()
-    }
-    persons = persons.concat(newPerson)
-    response.json(newPerson)
+        number: body.number
+    })
+    newPerson.save().then(person => {
+        console.log('new person added:', person);
+        response.json(person)
+    }).catch(error => {
+        console.log('adding person error:', error)
+    })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
