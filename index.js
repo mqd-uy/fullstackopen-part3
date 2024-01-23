@@ -1,6 +1,8 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/Person')
 
 const app = express()
 
@@ -45,16 +47,27 @@ let persons = [
 ]
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    Person.find({})
+        .then(result => {
+            response.json(result)
+        })
+        .catch(error => {
+            console.log('error fetching people:', error);
+        })
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = persons.find(p => p.id === id)
-    if (!person) {
-        response.status(404).end()
-    }
-    response.json(persons)
+    const id = request.params.id
+    Person.findById(id)
+        .then(person => {
+            if (!person)
+                response.status(404).end()
+            response.json(person)
+        })
+        .catch(error => {
+            console.log('find person by id error: ', error)
+            response.status(400).end()
+        })
 })
 
 app.post('/api/persons', (request, response) => {
@@ -106,7 +119,7 @@ const getNewId = () => {
     return newId
 }
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port: ${PORT}`);
 })
