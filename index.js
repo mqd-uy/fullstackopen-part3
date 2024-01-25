@@ -20,24 +20,18 @@ app.use(cors(corsOptions))
 morgan.token('response-data', (req, res) => JSON.stringify(req.body))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :response-data'))
 
-const errorHandler = (error, request, response, next) => {
-    if (error.name == 'CastError') {
-        return response.status(400).json({ error: 'malformatted id' })
-    }
-    next(error)
-}
-
-app.get('/api/persons', (request, response) => {
+app.get('/api/persons', (request, response, next) => {
     Person.find({})
         .then(result => {
             response.json(result)
         })
         .catch(error => {
-            console.log('error fetching people:', error);
+            console.log('error fetching people:', error)
+            next(error)
         })
 })
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
     const id = request.params.id
     Person.findById(id)
         .then(person => {
@@ -47,11 +41,11 @@ app.get('/api/persons/:id', (request, response) => {
         })
         .catch(error => {
             console.log('find person by id error: ', error)
-            response.status(400).end()
+            next(error)
         })
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const body = request.body
     if (!body.name || !body.number) {
         return response.status(400).json({
@@ -74,6 +68,7 @@ app.post('/api/persons', (request, response) => {
         response.json(person)
     }).catch(error => {
         console.log('adding person error:', error)
+        next(error)
     })
 })
 
@@ -82,7 +77,6 @@ app.delete('/api/persons/:id', (request, response, next) => {
     Person.findByIdAndDelete(id)
         .then(result => {
             console.log('person deleted: ', result);
-            // response.status(204).end()
             response.sendStatus(204)
         })
         .catch(error => next(error))
@@ -94,6 +88,14 @@ app.get('/info', (request, response) => {
     html += `<p>${new Date(Date.now()).toString()}</p>`
     response.send(html)
 })
+
+const errorHandler = (error, request, response, next) => {
+    console.log(error.message)
+    if (error.name == 'CastError') {
+        return response.status(400).json({ error: 'malformatted id' })
+    }
+    next(error)
+}
 
 app.use(errorHandler)
 
