@@ -82,8 +82,22 @@ app.delete('/api/persons/:id', (request, response, next) => {
         .catch(error => next(error))
 })
 
-app.get('/info', (request, response) => {
-    const contactsQty = persons.length
+app.put('/api/persons/:id', (request, response, next) => {
+    const body = request.body
+    const personToUpdate = {
+        name: body.name,
+        number: body.number
+    }
+    Person.findByIdAndUpdate(request.params.id, personToUpdate, { new: true })
+        .then(updatedPerson => {
+            console.log('updated person', updatedPerson);
+            response.json(updatedPerson)
+        })
+        .catch(error => next(error))
+})
+
+app.get('/info',async (request, response) => {
+    const contactsQty = await Person.countDocuments({})
     let html = `<p>Phonebook has info for ${contactsQty} ${contactsQty === 1 ? 'person' : 'people'}</p>`
     html += `<p>${new Date(Date.now()).toString()}</p>`
     response.send(html)
