@@ -96,7 +96,7 @@ app.put('/api/persons/:id', (request, response, next) => {
         .catch(error => next(error))
 })
 
-app.get('/info',async (request, response) => {
+app.get('/info', async (request, response) => {
     const contactsQty = await Person.countDocuments({})
     let html = `<p>Phonebook has info for ${contactsQty} ${contactsQty === 1 ? 'person' : 'people'}</p>`
     html += `<p>${new Date(Date.now()).toString()}</p>`
