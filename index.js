@@ -7,10 +7,7 @@ const Person = require('./models/Person')
 const app = express()
 
 app.use(express.static('dist'))
-
 app.use(express.json())
-
-morgan.token('response-data', (req, res) => JSON.stringify(req.body))
 
 const corsOptions = {
     origin: [
@@ -18,33 +15,17 @@ const corsOptions = {
         'https://localhost:5173'
     ]
 }
-
 app.use(cors(corsOptions))
 
+morgan.token('response-data', (req, res) => JSON.stringify(req.body))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :response-data'))
 
-let persons = [
-    {
-        "id": 1,
-        "name": "Arto Hellas",
-        "number": "040-123456"
-    },
-    {
-        "id": 2,
-        "name": "Ada Lovelace",
-        "number": "39-44-5323523"
-    },
-    {
-        "id": 3,
-        "name": "Dan Abramov",
-        "number": "12-43-234345"
-    },
-    {
-        "id": 4,
-        "name": "Mary Poppendieck",
-        "number": "39-23-6423122"
+const errorHandler = (error, request, response, next) => {
+    if (error.name == 'CastError') {
+        return response.status(400).json({ error: 'malformatted id' })
     }
-]
+    next(error)
+}
 
 app.get('/api/persons', (request, response) => {
     Person.find({})
@@ -96,16 +77,15 @@ app.post('/api/persons', (request, response) => {
     })
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const updatedPersons = persons.filter(p => p.id !== id)
-    if (persons.length - updatedPersons.length === 1) {
-        persons = updatedPersons
-        response.sendStatus(204)
-    } else {
-        response.status(404).end()
-    }
-
+app.delete('/api/persons/:id', (request, response, next) => {
+    const id = request.params.id
+    Person.findByIdAndDelete(id)
+        .then(result => {
+            console.log('person deleted: ', result);
+            // response.status(204).end()
+            response.sendStatus(204)
+        })
+        .catch(error => next(error))
 })
 
 app.get('/info', (request, response) => {
@@ -115,14 +95,7 @@ app.get('/info', (request, response) => {
     response.send(html)
 })
 
-const getNewId = () => {
-    let newId = 0
-    do {
-        newId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)
-    } while (persons.some(p => p.id === newId))
-
-    return newId
-}
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
