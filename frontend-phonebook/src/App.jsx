@@ -46,6 +46,11 @@ const App = () => {
           setSuccessMessage(`Added ${newPersonObject.name}`)
           setTimeout(() => setSuccessMessage(null), 3000)
         })
+        .catch(error => {
+          console.log('person added eror', error);
+          setFailMessage(error.response.data.error)
+          setTimeout(() => setFailMessage(null), 5000)
+        })
     }
   }
 
@@ -59,9 +64,14 @@ const App = () => {
           setSuccessMessage(`Updated ${personUpdated.name}`)
           setTimeout(() => setSuccessMessage(null), 3000)
         })
-        .catch(() => {
-          setPersons(persons.filter(p => p.id !== person.id))
-          setFailMessage(`Information of ${person.name} has already been removed from server`)
+        .catch(error => {
+          console.log('person updated eror', error);
+          if (error.response.status === 404) {
+            setPersons(persons.filter(p => p.id !== person.id))
+            setFailMessage(`Information of ${person.name} has already been removed from server`)
+          } else {
+            setFailMessage(error.response.data.error)
+          }
           setTimeout(() => setFailMessage(null), 3000)
         })
   }

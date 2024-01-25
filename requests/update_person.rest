@@ -1,7 +1,7 @@
-PUT http://localhost:3001/api/persons/65b29007797b775972606ab4
+PUT http://localhost:3001/api/persons/65b2e5fe1c5c8d4fd3800f35
 Content-Type: application/json
 
 {
-    "name": "Liisa Marttinen",
+    "name": "Pocha",
     "number": "040-243563"
 }

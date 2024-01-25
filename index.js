@@ -47,11 +47,12 @@ app.get('/api/persons/:id', (request, response, next) => {
 
 app.post('/api/persons', (request, response, next) => {
     const body = request.body
-    if (!body.name || !body.number) {
-        return response.status(400).json({
-            error: 'content missing'
-        })
-    }
+    // validation moved to mongoose schema
+    // if (!body.name || !body.number) {
+    //     return response.status(400).json({
+    //         error: 'content missing'
+    //     })
+    // }
     /*
     if (persons.some(p => p.name === body.name)) {
         return response.status(409).json({
@@ -88,9 +89,11 @@ app.put('/api/persons/:id', (request, response, next) => {
         name: body.name,
         number: body.number
     }
-    Person.findByIdAndUpdate(request.params.id, personToUpdate, { new: true })
+    Person.findByIdAndUpdate(request.params.id, personToUpdate, { new: true, runValidators: true })
         .then(updatedPerson => {
             console.log('updated person', updatedPerson);
+            if (!updatedPerson)
+                return response.status(404).end()
             response.json(updatedPerson)
         })
         .catch(error => next(error))
@@ -107,6 +110,9 @@ const errorHandler = (error, request, response, next) => {
     console.log(error.message)
     if (error.name == 'CastError') {
         return response.status(400).json({ error: 'malformatted id' })
+    }
+    if (error.name == 'ValidationError') {
+        return response.status(400).json({ error: error.message })
     }
     next(error)
 }

@@ -8,8 +8,14 @@ mongoose.connect(url).then(result => {
 })
 
 const personSchema = new mongoose.Schema({
-    name: String,
-    number: String
+    name: {
+        type: String,
+        minLength: [3, 'Name must be at least 3 characters']
+    },
+    number: {
+        type: String,
+        required: true
+    }
 })
 
 personSchema.set('toJSON', {
